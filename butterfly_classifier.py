@@ -52,16 +52,16 @@ DefaultConv2D = partial(tf.keras.layers.Conv2D, kernel_size=3, padding="same",
 
 # The architecture of the convolutional neural net.
 model = tf.keras.Sequential([
-    DefaultConv2D(filters=40, kernel_size=3,
+    DefaultConv2D(filters=32, kernel_size=7,
                   input_shape=[img_width, img_height, 3]),
     tf.keras.layers.MaxPool2D(),
-    DefaultConv2D(filters=80),
+    DefaultConv2D(filters=64),
     tf.keras.layers.MaxPool2D(),
-    DefaultConv2D(filters=160),
+    DefaultConv2D(filters=128),
     tf.keras.layers.MaxPool2D(),
-    DefaultConv2D(filters=320),
+    DefaultConv2D(filters=256),
     tf.keras.layers.Flatten(),
-    tf.keras.layers.Dense(units=128, activation="relu",
+    tf.keras.layers.Dense(units=256, activation="relu",
                           kernel_initializer="he_normal"),
     tf.keras.layers.Dropout(0.5),
     tf.keras.layers.Dense(units=num_classes, activation="softmax")
