@@ -1,4 +1,3 @@
- *.csv
 *.ipynb
 Training_set.csv
 Testing_set.csv
