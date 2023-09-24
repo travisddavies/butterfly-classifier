@@ -3,10 +3,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from functools import partial
 
+# Image dimensions and batch size for training.
 img_width = 128
 img_height = 128
 batch_size = 32
 
+# Image augmentation for train data.
 train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
     rescale=1./255,
     rotation_range=20,
@@ -19,15 +21,18 @@ train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
     brightness_range=[0.8, 1.2]
     )
 
+# Generator for test and validation data.
 test_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
     rescale=1./255)
 
+# Getting the train data.
 train_data = train_datagen.flow_from_directory(
         directory='train',
         target_size=(img_height, img_width),
         batch_size=batch_size,
         class_mode='categorical')
 
+# Getting the validation data.
 val_data = test_datagen.flow_from_directory(
         directory='val',
         target_size=(img_height, img_width),
@@ -35,11 +40,17 @@ val_data = test_datagen.flow_from_directory(
         class_mode='categorical',
         shuffle=False)
 
+# Getting the number of classes in the data set.
 num_classes = len(train_data.class_indices.keys())
 
+
 tf.random.set_seed(42)  # extra code – ensures reproducibility
+
+# Default convolutional layer for the neural net.
 DefaultConv2D = partial(tf.keras.layers.Conv2D, kernel_size=3, padding="same",
                         activation="relu", kernel_initializer="he_normal")
+
+# The architecture of the convolutional neural net.
 model = tf.keras.Sequential([
     DefaultConv2D(filters=32, kernel_size=7,
                   input_shape=[img_width, img_height, 3]),
@@ -54,7 +65,11 @@ model = tf.keras.Sequential([
     tf.keras.layers.Dropout(0.5),
     tf.keras.layers.Dense(units=num_classes, activation="softmax")
 ])
+
+# The optimiser of the neural net - Adam with eta of 4e-4
 optimiser = tf.keras.optimizers.Adam(learning_rate=4e-4)
+
+# Compiling the neural net.
 model.compile(loss="categorical_crossentropy", optimizer=optimiser,
               metrics=["accuracy"])
 
@@ -66,8 +81,10 @@ early_stopping_cb = tf.keras.callbacks.EarlyStopping(
 history = model.fit(train_data, validation_data=val_data, epochs=400,
                     callbacks=[early_stopping_cb])
 
+# Plot the history of the epochs for the neural net.
 pd.DataFrame(history.history).plot(
     xlim=[0, 300], ylim=[0, 1.2],
     grid=True, xlabel='Epoch', style=['r--', 'r--.', 'p-', 'b-*'])
 
+# Show the plot.
 plt.show()
