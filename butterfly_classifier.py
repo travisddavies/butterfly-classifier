@@ -68,7 +68,7 @@ model = tf.keras.Sequential([
 ])
 
 # The optimiser of the neural net - Adam with eta of 4e-4
-optimiser = tf.keras.optimizers.Adam(learning_rate=4e-4)
+optimiser = tf.keras.optimizers.Adam(learning_rate=2e-4)
 
 # Compiling the neural net.
 model.compile(loss="categorical_crossentropy", optimizer=optimiser,
