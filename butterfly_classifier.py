@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from functools import partial
 
 # Image dimensions and batch size for training.
-img_width = 128
-img_height = 128
+img_width = 224
+img_height = 224
 batch_size = 32
 
 # Image augmentation for train data.
