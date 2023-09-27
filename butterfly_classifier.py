@@ -2,6 +2,7 @@ import tensorflow as tf
 import pandas as pd
 import matplotlib.pyplot as plt
 from functools import partial
+import numpy as np
 
 # Image dimensions and batch size for training.
 img_width = 224
@@ -16,7 +17,6 @@ train_datagen = tf.keras.preprocessing.image.ImageDataGenerator(
     height_shift_range=0.2,
     zoom_range=[1.3, 0.7],
     shear_range=0.1,
-    # channel_shift_range=0.4,
     horizontal_flip=True,
     brightness_range=[0.8, 1.2]
     )
@@ -40,9 +40,16 @@ val_data = test_datagen.flow_from_directory(
         class_mode='categorical',
         shuffle=False)
 
+# Getting the test data.
+test_data = test_datagen.flow_from_directory(
+        directory='test',
+        target_size=(img_height, img_width),
+        batch_size=batch_size,
+        class_mode='categorical',
+        shuffle=False)
+
 # Getting the number of classes in the data set.
 num_classes = len(train_data.class_indices.keys())
-
 
 tf.random.set_seed(42)  # extra code – ensures reproducibility
 
@@ -79,13 +86,40 @@ early_stopping_cb = tf.keras.callbacks.EarlyStopping(
     patience=50, restore_best_weights=True)
 
 # train the model with 200 epochs
-history = model.fit(train_data, validation_data=val_data, epochs=400,
-                    callbacks=[early_stopping_cb])
+history_train = model.fit(train_data, validation_data=val_data,
+                          epochs=300, callbacks=[early_stopping_cb])
 
 # Plot the history of the epochs for the neural net.
-pd.DataFrame(history.history).plot(
+pd.DataFrame(history_train.history).plot(
     xlim=[0, 300], ylim=[0, 1.2],
     grid=True, xlabel='Epoch', style=['r--', 'r--.', 'p-', 'b-*'])
+
+# Turn validation data intro training data with augmentation
+val_data = train_datagen.flow_from_directory(
+        directory='val',
+        target_size=(img_height, img_width),
+        batch_size=batch_size,
+        class_mode='categorical')
+
+# Train on the validation data
+history_val = model.fit(val_data, epochs=20)
+
+# Predict the test data
+probabilities = model.predict(test_data)
+
+print('Generating submission.csv file...')
+
+test_yhat = (probabilities[:, 0] > 0.5).astype(int)
+
+# Write the submission file
+np.savetxt(
+    'submission.csv',
+    np.rec.fromarrays([id, test_yhat]),
+    fmt=['%s', '%d'],
+    delimiter=',',
+    header='id,label',
+    comments='',
+)
 
 # Show the plot.
 plt.show()
