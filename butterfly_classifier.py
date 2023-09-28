@@ -107,6 +107,10 @@ history_val = model.fit(val_data, epochs=30)
 # Predict the test data
 probabilities = model.predict(test_data)
 
+# Saving the model
+save_dir = 'saved_model'
+model.save(save_dir)
+
 print('Generating submission.csv file...')
 
 test_yhat = np.argmax(probabilities, axis=1)
