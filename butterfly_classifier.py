@@ -45,7 +45,7 @@ test_data = test_datagen.flow_from_directory(
         directory='test',
         target_size=(img_height, img_width),
         batch_size=batch_size,
-        class_mode='categorical',
+        class_mode=None,
         shuffle=False)
 
 # Getting the number of classes in the data set.
@@ -102,24 +102,23 @@ val_data = train_datagen.flow_from_directory(
         class_mode='categorical')
 
 # Train on the validation data
-history_val = model.fit(val_data, epochs=20)
+history_val = model.fit(val_data, epochs=30)
 
 # Predict the test data
 probabilities = model.predict(test_data)
 
 print('Generating submission.csv file...')
 
-test_yhat = (probabilities[:, 0] > 0.5).astype(int)
+test_yhat = np.argmax(probabilities, axis=1)
 
 # Write the submission file
 np.savetxt(
     'submission.csv',
-    np.rec.fromarrays([id, test_yhat]),
-    fmt=['%s', '%d'],
+    test_yhat,
+    fmt='%d',
     delimiter=',',
-    header='id,label',
-    comments='',
-)
+    header='label',
+    comments='')
 
 # Show the plot.
 plt.show()
